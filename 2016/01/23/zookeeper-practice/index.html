@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="DEAGON" />
+
+
+
+<meta name="description" content="zookeeper 用法总结（小白用户角度）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zookeeper 实践">
+<meta property="og:url" content="http://deagon.github.io/2016/01/23/zookeeper-practice/index.html">
+<meta property="og:site_name" content="Deagon Space">
+<meta property="og:description" content="zookeeper 用法总结（小白用户角度）">
+<meta property="og:updated_time" content="2017-01-30T02:05:26.276Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zookeeper 实践">
+<meta name="twitter:description" content="zookeeper 用法总结（小白用户角度）">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Deagon Space" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>zookeeper 实践 | Deagon Space</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: undefined
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/head.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">DEAGON</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:dgq8211@gmail.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/deagon" title="GitHub"></a>
+                            
+                                <a class="fa CSDN" href="http://blog.csdn.net/dgq8211" title="CSDN"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/cinder/">cinder</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/deploy-tools/">deploy-tools</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/distribute-system/">distribute-system</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/">kafka</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lib-tools/">lib-tools</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/openstack/">openstack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pep8/">pep8</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/routes/">routes</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell-tools/">shell-tools</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/thread/">thread</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/virtualenv/">virtualenv</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/windows/">windows</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/yield/">yield</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zookeeper/">zookeeper</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">DEAGON</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/head.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">DEAGON</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:dgq8211@gmail.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/deagon" title="GitHub"></a>
+                            
+                                <a class="fa CSDN" target="_blank" href="http://blog.csdn.net/dgq8211" title="CSDN"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-zookeeper-practice" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/01/23/zookeeper-practice/" class="article-date">
+      <time datetime="2016-01-23T15:51:57.000Z" itemprop="datePublished">2016-01-23</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      zookeeper 实践
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Tech/">Tech</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/distribute-system/">distribute-system</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zookeeper/">zookeeper</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2 id="常用场景"><a href="#常用场景" class="headerlink" title="常用场景"></a>常用场景</h2><h3 id="查看具体结点信息"><a href="#查看具体结点信息" class="headerlink" title="查看具体结点信息"></a>查看具体结点信息</h3><pre><code>openstack@yz-cloud03:~/zookeeper-3.4.6/bin$ ./zkServer.sh status
+JMX enabled by default
+Using config: /home/openstack/zookeeper-3.4.6/bin/../conf/zoo.cfg
+Mode: follower
+</code></pre><h3 id="查看哪个结点被选作leader或者follower"><a href="#查看哪个结点被选作leader或者follower" class="headerlink" title="查看哪个结点被选作leader或者follower"></a>查看哪个结点被选作<code>leader</code>或者<code>follower</code></h3><pre><code>openstack@yz-cloud03:~/zookeeper-3.4.6/bin$ echo stat|nc 127.0.0.1 2181
+Zookeeper version: 3.4.6-1569965, built on 02/20/2014 09:09 GMT
+Clients:
+ /10.20.246.26:50777[1](queued=0,recved=3388,sent=3388)
+ /10.20.246.25:44699[1](queued=0,recved=84646,sent=84646)
+ /127.0.0.1:51054[0](queued=0,recved=1,sent=0)
+ /10.20.246.25:55158[1](queued=0,recved=3406,sent=3406)
+Latency min/avg/max: 0/0/1267
+Received: 218739
+Sent: 218755
+Connections: 4
+Outstanding: 0
+Zxid: 0x70000a8c2
+Mode: follower
+Node count: 59
+</code></pre><h3 id="存放delete-topics信息的路径"><a href="#存放delete-topics信息的路径" class="headerlink" title="存放delete_topics信息的路径"></a>存放<code>delete_topics</code>信息的路径</h3><pre><code>/admin/delete_topics
+</code></pre><h2 id="命令行"><a href="#命令行" class="headerlink" title="命令行"></a>命令行</h2><blockquote>
+<p>类似于在<code>shell</code>的一个带某些环境变量的<code>子shell</code>下运行自定义的命令</p>
+</blockquote>
+<pre><code>openstack@yz-cloud03:~/zookeeper-3.4.6/bin$ bash zkCli.sh -server 127.0.0.1:2181
+Connecting to 127.0.0.1:2181
+2015-11-15 21:13:22,368 [myid:] - INFO  [main:Environment@100] - Client environment:zookeeper.version=3.4.6-1569965, built on 02/20/2014 09:09 GMT
+2015-11-15 21:13:22,374 [myid:] - INFO  [main:Environment@100] - Client environment:host.name=yz-cloud03
+2015-11-15 21:13:22,374 [myid:] - INFO  [main:Environment@100] - Client environment:java.version=1.7.0_79
+2015-11-15 21:13:22,378 [myid:] - INFO  [main:Environment@100] - Client environment:java.vendor=Oracle Corporation
+2015-11-15 21:13:22,378 [myid:] - INFO  [main:Environment@100] - Client environment:java.home=/usr/lib/jvm/java-7-openjdk-amd64/jre
+2015-11-15 21:13:22,379 [myid:] - INFO  [main:Environment@100] - Client environment:java.class.path=/home/openstack/zookeeper-3.4.6/bin/../build/classes:/home/openstack/zookeeper-3.4.6/bin/../build/lib/*.jar:/home/openstack/zookeeper-3.4.6/bin/../lib/slf4j-log4j12-1.6.1.jar:/home/openstack/zookeeper-3.4.6/bin/../lib/slf4j-api-1.6.1.jar:/home/openstack/zookeeper-3.4.6/bin/../lib/netty-3.7.0.Final.jar:/home/openstack/zookeeper-3.4.6/bin/../lib/log4j-1.2.16.jar:/home/openstack/zookeeper-3.4.6/bin/../lib/jline-0.9.94.jar:/home/openstack/zookeeper-3.4.6/bin/../zookeeper-3.4.6.jar:/home/openstack/zookeeper-3.4.6/bin/../src/java/lib/*.jar:/home/openstack/zookeeper-3.4.6/bin/../conf:
+2015-11-15 21:13:22,379 [myid:] - INFO  [main:Environment@100] - Client environment:java.library.path=/usr/java/packages/lib/amd64:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib
+2015-11-15 21:13:22,379 [myid:] - INFO  [main:Environment@100] - Client environment:java.io.tmpdir=/tmp
+2015-11-15 21:13:22,379 [myid:] - INFO  [main:Environment@100] - Client environment:java.compiler=&lt;NA&gt;
+2015-11-15 21:13:22,379 [myid:] - INFO  [main:Environment@100] - Client environment:os.name=Linux
+2015-11-15 21:13:22,380 [myid:] - INFO  [main:Environment@100] - Client environment:os.arch=amd64
+2015-11-15 21:13:22,380 [myid:] - INFO  [main:Environment@100] - Client environment:os.version=3.16.0-30-generic
+2015-11-15 21:13:22,380 [myid:] - INFO  [main:Environment@100] - Client environment:user.name=openstack
+2015-11-15 21:13:22,380 [myid:] - INFO  [main:Environment@100] - Client environment:user.home=/home/openstack
+2015-11-15 21:13:22,380 [myid:] - INFO  [main:Environment@100] - Client environment:user.dir=/home/openstack/zookeeper-3.4.6/bin
+2015-11-15 21:13:22,383 [myid:] - INFO  [main:ZooKeeper@438] - Initiating client connection, connectString=127.0.0.1:2181 sessionTimeout=30000 watcher=org.apache.zookeeper.ZooKeeperMain$MyWatcher@70038599
+Welcome to ZooKeeper!
+2015-11-15 21:13:22,438 [myid:] - INFO  [main-SendThread(127.0.0.1:2181):ClientCnxn$SendThread@975] - Opening socket connection to server 127.0.0.1/127.0.0.1:2181. Will not attempt to authenticate using SASL (unknown error)
+JLine support is enabled
+2015-11-15 21:13:22,447 [myid:] - INFO  [main-SendThread(127.0.0.1:2181):ClientCnxn$SendThread@852] - Socket connection established to 127.0.0.1/127.0.0.1:2181, initiating session
+2015-11-15 21:13:22,468 [myid:] - INFO  [main-SendThread(127.0.0.1:2181):ClientCnxn$SendThread@1235] - Session establishment complete on server 127.0.0.1/127.0.0.1:2181, sessionid = 0x250c783caed0027, negotiated timeout = 30000
+
+WATCHER::
+
+WatchedEvent state:SyncConnected type:None path:null
+[zk: 127.0.0.1:2181(CONNECTED) 0]
+</code></pre><blockquote>
+<p>输入<strong>help</strong>显示帮助信息：</p>
+</blockquote>
+<pre><code>help
+ZooKeeper -server host:port cmd args
+        connect host:port
+        get path [watch]
+        ls path [watch]
+        set path data [version]
+        rmr path
+        delquota [-n|-b] path
+        quit
+        printwatches on|off
+        create [-s] [-e] path data acl
+        stat path [watch]
+        close
+        ls2 path [watch]
+        history
+        listquota path
+        setAcl path acl
+        getAcl path
+        sync path
+        redo cmdno
+        addauth scheme auth
+        delete path [version]
+        setquota -n|-b val path
+[zk: 127.0.0.1:2181(CONNECTED) 0]
+</code></pre><blockquote>
+<p>使用<strong>ls</strong>命令来查看当前<code>zookeeper</code>中所包含的内容：</p>
+</blockquote>
+<pre><code>[zk: 202.115.36.251:2181(CONNECTED) 1] ls /
+[zookeeper]
+</code></pre><blockquote>
+<p>创建一个新的<code>znode</code>，使用<strong>create /zk myData</strong>。这个命令创建了一个新的<code>znode</code>节点<strong>zk</strong>以及与它关联的字符串：</p>
+</blockquote>
+<pre><code>[zk: 202.115.36.251:2181(CONNECTED) 2] create /zk &quot;myData&quot;
+Created /zk
+</code></pre><blockquote>
+<p>我们运行<strong>get</strong>命令来确认<code>znode</code>是否包含我们所创建的字符串：</p>
+</blockquote>
+<pre><code>[zk: 202.115.36.251:2181(CONNECTED) 3] get /zk
+cZxid = 0x6
+ctime = Thu Sep 12 15:49:16 CST 2013
+mZxid = 0x7
+mtime = Thu Sep 12 15:49:38 CST 2013
+pZxid = 0x6
+cversion = 0
+dataVersion = 1
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 10
+numChildren = 0
+</code></pre><blockquote>
+<p>下面我们通过<strong>set</strong>命令来对<strong>zk</strong>所关联的字符串进行设置：</p>
+</blockquote>
+<pre><code>[zk: 202.115.36.251:2181(CONNECTED) 4] set /zk &quot;zsl&quot; &quot;myData&quot;
+cZxid = 0x4
+ctime = Thu Sep 12 15:46:37 CST 2013
+mZxid = 0x4
+mtime = Thu Sep 12 15:46:37 CST 2013
+pZxid = 0x4
+cversion = 0
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 8
+numChildren = 0
+</code></pre><blockquote>
+<p>下面我们将刚才创建的<code>znode</code>删除：</p>
+</blockquote>
+<pre><code>[zk: 202.115.36.251:2181(CONNECTED) 5] delete /zk
+</code></pre><blockquote>
+<p>当然，我们还可以创建有层次的目录，比如使用<strong>create /zk/node1</strong>在<strong>zk</strong>目录下创建新的目录<strong>node1</strong></p>
+</blockquote>
+<pre><code>[zk: 192.168.255.133:2181(CONNECTED) 18] create /zk/node1 &quot;node1&quot;
+Created /zk/node1
+[zk: 192.168.255.133:2181(CONNECTED) 19] ls /zk
+[node1]
+</code></pre><h3 id="四字命令"><a href="#四字命令" class="headerlink" title="四字命令"></a>四字命令</h3><p><strong> Demo </strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:/usr/lib/zookeeper/bin# echo conf |nc 192.168.255.133 2181    </span><br><span class="line">clientPort=2181</span><br><span class="line">dataDir=/var/lib/zookeeper/version-2</span><br><span class="line">dataLogDir=/var/log/zookeeper/version-2</span><br><span class="line">tickTime=2000</span><br><span class="line">maxClientCnxns=50</span><br><span class="line">minSessionTimeout=4000</span><br><span class="line">maxSessionTimeout=40000</span><br><span class="line">serverId=0</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openstack@yz-cloud03:~/zookeeper-3.4.6/bin$ echo ruok |nc 127.0.0.1 2181</span><br><span class="line">imok</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><code>conf</code><br>输出相关服务配置的详细信息。</p>
+<p><code>cons</code><br>列出所有连接到服务器的客户端的完全的连接 / 会话的详细信息。包括“接受 / 发送”的包数量、会话 id 、操作延迟、最后的操作执行等等信息。</p>
+<p><code>dump</code><br>列出未经处理的会话和临时节点。</p>
+<p><code>envi</code><br>输出关于服务环境的详细信息（区别于 conf 命令）。</p>
+<p><code>reqs</code><br>列出未经处理的请求</p>
+<p><code>ruok</code><br>测试服务是否处于正确状态。如果确实如此，那么服务返回“imok ”，否则不做任何相应。</p>
+<p><code>stat</code><br>输出关于性能和连接的客户端的列表。</p>
+<p><code>wchs</code><br>列出服务器 watch 的详细信息。</p>
+<p><code>wchc</code><br>通过 session 列出服务器 watch 的详细信息，它的输出是一个与watch 相关的会话的列表。</p>
+<p><code>wchp</code><br>通过路径列出服务器 watch 的详细信息。它输出一个与 session相关的路径。</p>
+</blockquote>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/01/23/zookeeper-practice/">zookeeper 实践</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">DEAGON</a></p>
+        <p><span>发布时间:</span>2016-01-23, 23:51:57</p>
+        <p><span>最后更新:</span>2017-01-30, 10:05:26</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/01/23/zookeeper-practice/" title="zookeeper 实践">http://deagon.github.io/2016/01/23/zookeeper-practice/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://deagon.github.io/2016/01/23/zookeeper-practice/　　作者: DEAGON" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/01/23/virtualenv-practice/">
+                    virtualenv 实践
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/01/21/python-routes/">
+                    python-routes 译
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#常用场景"><span class="toc-number">1.</span> <span class="toc-text">常用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#查看具体结点信息"><span class="toc-number">1.1.</span> <span class="toc-text">查看具体结点信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#查看哪个结点被选作leader或者follower"><span class="toc-number">1.2.</span> <span class="toc-text">查看哪个结点被选作leader或者follower</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#存放delete-topics信息的路径"><span class="toc-number">1.3.</span> <span class="toc-text">存放delete_topics信息的路径</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#命令行"><span class="toc-number">2.</span> <span class="toc-text">命令行</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#四字命令"><span class="toc-number">2.1.</span> <span class="toc-text">四字命令</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"zookeeper 实践　| Deagon Space　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section id="comments">
+    <style> aside.comment-bar { margin: auto 30px; }</style>
+    <div id="disqus_thread"></div>
+    <script>
+        var disqus_config = function(){
+            this.page.url = 'http://deagon.github.io/2016/01/23/zookeeper-practice/';
+            this.page.identifier = '2016/01/23/zookeeper-practice/';
+        };
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = '//deagon.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+    
+    <script> loadComment(); </script>
+
+</section>
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/01/23/virtualenv-practice/" title="上一篇: virtualenv 实践">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/01/21/python-routes/" title="下一篇: python-routes 译">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/01/25/openstack-thread/">openstack-thread 模型</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/25/openstack-cinder-deploy/">cinder 部署记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/25/openstack-taskflow-note/">openstack-taskflow 组件记录（译）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/24/windows-pit/">windows 踩坑记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/23/virtualenv-practice/">virtualenv 实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/23/zookeeper-practice/">zookeeper 实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/21/python-routes/">python-routes 译</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/15/rsync-practice/">rsync 部署实战</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/13/rpmbuild-practice/">rpmbuild 实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/05/kafka-concepts/">kafka 概念整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/04/python-yield/">python-yield 学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/04/python-paste-deploy/">python-paste_deploy</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/04/python-pep8/">python-pep8 规范整理</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2017 DEAGON
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
