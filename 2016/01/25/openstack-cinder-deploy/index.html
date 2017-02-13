@@ -21,7 +21,7 @@
 <meta property="og:url" content="http://deagon.github.io/2016/01/25/openstack-cinder-deploy/index.html">
 <meta property="og:site_name" content="Deagon Space">
 <meta property="og:description" content="cinder 部署与配置记录备忘">
-<meta property="og:updated_time" content="2017-01-30T01:54:13.885Z">
+<meta property="og:updated_time" content="2017-02-13T14:54:31.431Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="cinder 部署记录">
 <meta name="twitter:description" content="cinder 部署与配置记录备忘">
@@ -293,17 +293,22 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><blockquote>
-<p>1 创建<code>volume</code>之前需要先创建<code>volume-type</code></p>
-<p>2 创建<code>type</code>之后，要把<code>type</code>和<code>volume_backend_name</code>关联起来</p>
+        <h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><ol>
+<li><p>创建 <code>volume</code> 之前需要先创建 <code>volume-type</code></p>
 <ul>
-<li>cinder type-key ${TYPE} set volume_backend_name = ${BACKEND}</li>
+<li><em>cinder type-create</em></li>
+<li><em>cinder type-list</em></li>
 </ul>
-<p>3 配置<code>backend</code>的时候，有些字段是特有的</p>
-<p>4 <code>volume_driver</code>与<code>volume_backend_name</code>是通用的</p>
-</blockquote>
+</li>
+<li><p>创建 <code>type</code> 之后，要把 <code>type</code> 和 <code>volume_backend_name</code> 关联起来</p>
+<ul>
+<li><em>cinder type-key ${TYPE} set volume_backend_name = ${BACKEND}</em></li>
+<li><em>cinder extra-specs-list</em></li>
+</ul>
+</li>
+</ol>
 <h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><blockquote>
-<p><code>ceph</code>关于<code>backend</code>的配置；</p>
+<p><code>ceph</code> 关于 <code>backend</code> 的配置</p>
 </blockquote>
 <pre><code>[rbd-ssd]
 volume_backend_name = RBD_SSD
@@ -312,32 +317,41 @@ rbd_pool = volumes_hp
 rbd_user = volumes
 rbd_ceph_conf = /etc/ceph/ceph.conf
 </code></pre><blockquote>
-<p><code>lvm</code>关于<code>backend</code>的配置；</p>
+<p><code>lvm</code> 关于 <code>backend</code>的配置</p>
 </blockquote>
 <pre><code>[lvm-002-07]
 volume_backend_name = LVM_iSCSI
 volume_driver = cinder.volume.drivers.lvm.LVMISCSIDriver
 volume_group = sp-volume-group-002-07
-</code></pre><h3 id="Default-Config"><a href="#Default-Config" class="headerlink" title="Default Config"></a>Default Config</h3><pre><code>cfg.ListOpt(&apos;scheduler_default_filters&apos;,
-            default=[
-                &apos;AvailabilityZoneFilter&apos;,
-                &apos;CapacityFilter&apos;,
-                &apos;CapabilitiesFilter&apos;
-            ],
-            help=&apos;Which filter class names to use for filtering hosts &apos;
-                 &apos;when not specified in the request.&apos;),
-cfg.ListOpt(&apos;scheduler_default_weighers&apos;,
-            default=[
-                &apos;CapacityWeigher&apos;
-            ],
-            help=&apos;Which weigher class names to use for weighing hosts.&apos;)
+</code></pre><blockquote>
+<p><code>vmware</code> 关于 <code>backend</code> 的配置:</p>
+</blockquote>
+<pre><code>[vmdk]
+volume_backend_name = VMDK
+volume_driver = cinder.volume.drivers.vmware.vmdk.VMwareVcVmdkDriver
+
+# IP address for connecting to VMware ESX/VC server. (string
+# value)
+vmware_host_ip = 192.168.122.76
+
+# Username for authenticating with VMware ESX/VC server.
+# (string value)
+vmware_host_username = xxx
+
+# Password for authenticating with VMware ESX/VC server.
+# (string value)
+vmware_host_password = yyy
 </code></pre><h3 id="Special-Config"><a href="#Special-Config" class="headerlink" title="Special Config"></a>Special Config</h3><blockquote>
 <ul>
-<li>host_state.thin_provisioning_support<ul>
-<li>…</li>
+<li><p>host_state.thin_provisioning_support</p>
+<ul>
+<li>Boolean value.</li>
+<li>是否按需分配</li>
 </ul>
 </li>
-<li>host_state.max_over_subscription_ratio<ul>
+<li><p>host_state.max_over_subscription_ratio</p>
+<ul>
+<li>Float value.</li>
 <li>超额分配比，如果想超额，就 &gt; 1。</li>
 </ul>
 </li>
@@ -354,7 +368,7 @@ cfg.ListOpt(&apos;scheduler_default_weighers&apos;,
         <p><span>本文标题:</span><a href="/2016/01/25/openstack-cinder-deploy/">cinder 部署记录</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">DEAGON</a></p>
         <p><span>发布时间:</span>2016-01-25, 17:46:55</p>
-        <p><span>最后更新:</span>2017-01-30, 09:54:13</p>
+        <p><span>最后更新:</span>2017-02-13, 22:54:31</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2016/01/25/openstack-cinder-deploy/" title="cinder 部署记录">http://deagon.github.io/2016/01/25/openstack-cinder-deploy/</a>
             <span class="copy-path" data-clipboard-text="原文: http://deagon.github.io/2016/01/25/openstack-cinder-deploy/　　作者: DEAGON" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -390,7 +404,7 @@ cfg.ListOpt(&apos;scheduler_default_weighers&apos;,
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#步骤"><span class="toc-number">1.</span> <span class="toc-text">步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置"><span class="toc-number">2.</span> <span class="toc-text">配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Default-Config"><span class="toc-number">2.1.</span> <span class="toc-text">Default Config</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Special-Config"><span class="toc-number">2.2.</span> <span class="toc-text">Special Config</span></a></li></ol></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#步骤"><span class="toc-number">1.</span> <span class="toc-text">步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置"><span class="toc-number">2.</span> <span class="toc-text">配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Special-Config"><span class="toc-number">2.1.</span> <span class="toc-text">Special Config</span></a></li></ol></li></ol>
         
     </div>
     <style>
